@@ -3,21 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Revengue4U</title>
+<title>Revenge4U</title>
 <meta name="theme-color" content="#1f2a44">
-<meta name="description" content="Revengue4U – פנקס הנקמות: רישום נקמות, מעקב לפי אדם, רמת נקמה והקראה קולית בעברית">
+<meta name="color-scheme" content="only light">
+<meta name="description" content="Revenge4U – פנקס הנקמות: רישום נקמות, מעקב לפי אדם, רמת נקמה והקראה קולית בעברית">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Revengue4U">
+<meta name="apple-mobile-web-app-title" content="Revenge4U">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Secular+One&display=swap" rel="stylesheet">
 <style>
   :root {
+    color-scheme: only light;
     --ink: #1f2a44;
     --ink-soft: #4a5573;
     --paper: #fbf6ea;
@@ -65,9 +67,9 @@
   header {
     background: var(--ink);
     color: #fff;
-    padding: 14px 16px 0;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 0;
     position: sticky;
-    top: env(safe-area-inset-top, 0px);
+    top: 0;
     z-index: 10;
   }
   .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -105,6 +107,8 @@
   main { flex: 1; padding: 18px 16px 32px; }
   .view { display: none; animation: fade .25s ease; }
   .view.active { display: block; }
+  .card.fresh { animation: fresh 2.4s ease; }
+  @keyframes fresh { 0%, 30% { box-shadow: 0 0 0 4px var(--gold), var(--shadow); } 100% { box-shadow: var(--shadow); } }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   h2 { font-family: "Secular One", sans-serif; font-size: 22px; margin: 4px 0 12px; }
@@ -307,7 +311,7 @@
       <div class="logo">
         <div class="logo-mark">נ</div>
         <div>
-          <h1>Revengue4U</h1>
+          <h1>Revenge4U</h1>
           <small>פנקס הנקמות · כל חשבון נסגר בסוף</small>
         </div>
       </div>
@@ -603,6 +607,9 @@
     speechSynthesis.speak(u);
   }
   function speak(...lines) {
+    try { speakSafe(...lines); } catch {}
+  }
+  function speakSafe(...lines) {
     if (!soundOn) return;
     if (!('speechSynthesis' in window)) { toast('הדפדפן הזה אינו תומך בהקראה קולית'); return; }
     if (!heVoice) pickVoice();
@@ -973,30 +980,49 @@
       level: +range.value
     };
     const editId = $('#editId').value;
+    let id = editId;
     if (editId) {
       const item = items.find(i => i.id === editId);
       if (item) Object.assign(item, data);
-      save(); resetForm(); renderAll();
+    } else {
+      id = uid();
+      items.push({ id, ...data, status: 'open', createdAt: Date.now() });
+    }
+    save(); resetForm();
+    listFilter = 'open';
+    personFilter = null;
+    $$('.seg button').forEach(x => x.classList.toggle('active', x.dataset.filter === 'open'));
+    renderAll();
+    go('list');
+    highlightCard(id);
+
+    if (editId) {
       toast('✏️ הנקמה עודכנה');
     } else {
-      items.push({ id: uid(), ...data, status: 'open', createdAt: Date.now() });
-      save(); resetForm(); renderAll();
       const count = openCountPhrase(openItems().length);
-      speak('נקמה חדשה נוצרה', count);
       toast('📒 נקמה חדשה נוצרה! ' + count + '.');
+      speak('נקמה חדשה נוצרה', count);
     }
-    listFilter = 'open';
-    $$('.seg button').forEach(x => x.classList.toggle('active', x.dataset.filter === 'open'));
-    renderList();
-    go('list');
   });
+
+  function highlightCard(id) {
+    const card = document.querySelector(`.card[data-id="${id}"]`);
+    if (!card) return;
+    card.classList.add('fresh');
+    setTimeout(() => {
+      const headerH = $('header').offsetHeight;
+      const top = card.getBoundingClientRect().top + window.scrollY - headerH - 12;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }, 80);
+    setTimeout(() => card.classList.remove('fresh'), 2500);
+  }
 
   // ---------- שיתוף ----------
   function shareListText() {
     const withDetails = $('#shareDetails').checked;
     const withDone = $('#shareDone').checked;
     const open = openItems().sort((a, b) => b.level - a.level);
-    const lines = ['📒 פנקס הנקמות שלי ב־Revengue4U', ''];
+    const lines = ['📒 פנקס הנקמות שלי ב־Revenge4U', ''];
     if (!open.length) lines.push('אין לי כרגע נקמות פתוחות. 🕊️');
     else {
       lines.push(`נקמות פתוחות: ${open.length}`);
@@ -1013,12 +1039,12 @@
         if (withDetails) lines.push(`   ${i.reason.replace(/\n+/g, ' ')}`);
       });
     }
-    lines.push('', 'נרשם ב־Revengue4U — כל חשבון נסגר בסוף.', location.href.startsWith('http') ? location.origin + location.pathname : '');
+    lines.push('', 'נרשם ב־Revenge4U — כל חשבון נסגר בסוף.', location.href.startsWith('http') ? location.origin + location.pathname : '');
     return lines.join('\n');
   }
   function singleShareText(i) {
     return [
-      '📒 מתוך פנקס הנקמות שלי ב־Revengue4U:',
+      '📒 מתוך פנקס הנקמות שלי ב־Revenge4U:',
       `${i.name} — רמת נקמה ${i.level}/10 (${levelName(i.level)})`,
       `סטטוס: ${STATUSES[i.status].label}`,
       i.reason
@@ -1043,7 +1069,7 @@
   }
   async function shareText(text) {
     if (navigator.share) {
-      try { await navigator.share({ title: 'Revengue4U', text }); return; }
+      try { await navigator.share({ title: 'Revenge4U', text }); return; }
       catch (err) { if (err && err.name === 'AbortError') return; }
     }
     copy(text);
@@ -1068,7 +1094,7 @@
     let saved = false;
     // בטלפון: תפריט השיתוף מאפשר לשמור בקבצים, בדרייב או לשלוח לעצמך
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'גיבוי Revengue4U' }); saved = true; }
+      try { await navigator.share({ files: [file], title: 'גיבוי Revenge4U' }); saved = true; }
       catch (err) { if (err && err.name === 'AbortError') return; }
     }
     if (!saved) {
