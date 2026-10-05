@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>פנקס הנקמות</title>
+<meta name="theme-color" content="#1f2a44">
+<meta name="description" content="פנקס הנקמות: רישום נקמות, מעקב לפי אדם, רמת נקמה והקראה קולית בעברית">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="פנקס הנקמות">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2a44;
+    --ink-soft: #4a5573;
+    --paper: #fbf6ea;
+    --paper-line: #e6dcc3;
+    --stamp: #c8283c;
+    --stamp-dark: #9c1b2d;
+    --gold: #e0a526;
+    --ok: #2f8a5b;
+    --card: #ffffff;
+    --bg: #1f2a44;
+    --shadow: 0 6px 18px rgba(31, 42, 68, .14);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { height: 100%; }
+  body { margin: 0; min-height: 100%; align-items: flex-start; }
+  body {
+    font-family: "Rubik", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(200,40,60,.35), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(224,165,38,.25), transparent 45%),
+      var(--bg);
+    display: flex;
+    justify-content: center;
+  }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--paper);
+    background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--paper-line) 31px 32px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,.35);
+  }
+
+  /* ---------- כותרת ---------- */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 14px 16px 0;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+  }
+  .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 3px solid var(--stamp);
+    display: grid; place-items: center;
+    font-family: "Secular One", sans-serif; font-size: 20px; color: var(--stamp);
+    background: #fff; transform: rotate(-12deg);
+  }
+  .logo h1 { margin: 0; font-family: "Secular One", sans-serif; font-size: 24px; line-height: 1; letter-spacing: .5px; }
+  .logo small { display: block; font-size: 12px; opacity: .75; margin-top: 3px; }
+  .icon-btn {
+    background: rgba(255,255,255,.12); border: 0; color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  nav.tabs { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 12px; }
+  nav.tabs button {
+    background: none; border: 0; color: rgba(255,255,255,.65);
+    padding: 10px 4px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; position: relative;
+  }
+  nav.tabs button svg { width: 22px; height: 22px; }
+  nav.tabs button.active { color: #fff; border-bottom-color: var(--stamp); }
+  .badge {
+    position: absolute; top: 4px; inset-inline-start: calc(50% + 6px);
+    background: var(--stamp); color: #fff; font-size: 11px; font-weight: 700;
+    min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px; display: grid; place-items: center;
+  }
+  .badge:empty { display: none; }
+
+  main { flex: 1; padding: 18px 16px 32px; }
+  .view { display: none; animation: fade .25s ease; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  h2 { font-family: "Secular One", sans-serif; font-size: 22px; margin: 4px 0 12px; }
+  h3 { font-size: 16px; margin: 18px 0 8px; color: var(--ink-soft); }
+  .muted { color: var(--ink-soft); }
+
+  /* ---------- ראשי ---------- */
+  .hero { text-align: center; padding: 18px 8px 8px; }
+  .hero .stamp {
+    display: inline-block; font-family: "Secular One", sans-serif; color: var(--stamp);
+    border: 3px solid var(--stamp); border-radius: 8px; padding: 4px 14px; font-size: 15px;
+    transform: rotate(-4deg); margin-bottom: 14px; background: rgba(255,255,255,.6);
+  }
+  .hero h2 { font-size: 30px; margin: 0 0 6px; }
+  .hero p { margin: 0 0 20px; font-size: 16px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+  .stat {
+    background: var(--card); border-radius: var(--radius); padding: 14px 6px; text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat b { display: block; font-size: 28px; font-weight: 900; line-height: 1.1; }
+  .stat span { font-size: 13px; color: var(--ink-soft); }
+  .stat.red b { color: var(--stamp); }
+  .stat.green b { color: var(--ok); }
+
+  .btn {
+    border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 16px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .1s ease, filter .15s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--stamp); color: #fff; box-shadow: 0 4px 0 var(--stamp-dark); }
+  .btn-ink { background: var(--ink); color: #fff; }
+  .btn-ghost { background: transparent; border: 2px solid var(--ink); color: var(--ink); }
+  .btn-ok { background: var(--ok); color: #fff; }
+  .btn-block { width: 100%; }
+  .btn svg { width: 18px; height: 18px; }
+
+  .quote {
+    margin-top: 22px; background: var(--card); border-inline-start: 5px solid var(--gold);
+    padding: 14px 16px; border-radius: 10px; box-shadow: var(--shadow); font-size: 15px;
+  }
+  .quote small { display: block; margin-top: 6px; color: var(--ink-soft); }
+
+  /* ---------- הנקמות שלי ---------- */
+  .people { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; }
+  .people::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; background: var(--card); border: 2px solid var(--paper-line); border-radius: 999px;
+    padding: 6px 8px 6px 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;
+  }
+  .chip .count {
+    background: var(--ink); color: #fff; border-radius: 999px; min-width: 24px; height: 24px; padding: 0 6px;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700;
+  }
+  .chip.active { border-color: var(--stamp); background: #fff1f2; }
+  .chip.active .count { background: var(--stamp); }
+
+  .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--card); border-radius: 999px; padding: 4px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .seg button { border: 0; background: none; border-radius: 999px; padding: 8px; font-weight: 500; }
+  .seg button.active { background: var(--ink); color: #fff; }
+
+  .person-table { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px; }
+  .person-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px dashed var(--paper-line); font-size: 15px; }
+  .person-row:last-child { border-bottom: 0; }
+  .person-row .bar { flex: 1; height: 6px; margin: 0 12px; background: #f1ecdf; border-radius: 3px; overflow: hidden; }
+  .person-row .bar i { display: block; height: 100%; background: var(--stamp); border-radius: 3px; }
+  .person-row .num { font-weight: 700; white-space: nowrap; }
+
+  .card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 14px; margin-bottom: 12px; position: relative; overflow: hidden;
+  }
+  .card::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 6px; background: var(--lvl, var(--stamp)); }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .card-title { font-weight: 700; font-size: 18px; }
+  .card-sub { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .card p { margin: 10px 0; font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .level-pill {
+    flex: 0 0 auto; text-align: center; border-radius: 12px; padding: 6px 10px; color: #fff; background: var(--lvl, var(--stamp));
+    font-weight: 900; font-size: 20px; line-height: 1;
+  }
+  .level-pill small { display: block; font-size: 10px; font-weight: 500; margin-top: 3px; }
+  .status {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px; background: #eef1f7; color: var(--ink);
+  }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .status.open { color: #b5651d; background: #fdf1e3; }
+  .status.planning { color: #3f5bb8; background: #e9eefc; }
+  .status.active { color: var(--stamp); background: #fde9eb; }
+  .status.done { color: var(--ok); background: #e3f4ea; }
+  .card-actions { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+  .card-actions .btn { padding: 8px 12px; font-size: 14px; white-space: nowrap; }
+  .card-actions .btn-ghost { border-width: 1.5px; }
+  .card-actions .spacer { flex: 1; }
+  .mini { flex: 0 0 auto; background: none; border: 0; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-soft); }
+  .mini:hover { background: #f1ecdf; }
+  .mini svg { width: 18px; height: 18px; }
+  .mini.danger:hover { color: var(--stamp); }
+  .date { font-size: 12px; color: var(--ink-soft); }
+
+  .empty { text-align: center; padding: 30px 10px; color: var(--ink-soft); }
+  .empty .big { font-size: 46px; }
+
+  /* ---------- טופס ---------- */
+  form .field { margin-bottom: 14px; }
+  label.lbl { display: block; font-weight: 700; margin-bottom: 6px; font-size: 15px; }
+  label.lbl .opt { font-weight: 400; color: var(--ink-soft); font-size: 13px; }
+  .input {
+    width: 100%; border: 2px solid var(--paper-line); background: var(--card); border-radius: 12px;
+    padding: 11px 12px; font-size: 16px; outline: none; transition: border-color .15s;
+  }
+  .input:focus { border-color: var(--ink); }
+  textarea.input { min-height: 96px; resize: vertical; line-height: 1.5; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .section-box { background: rgba(255,255,255,.7); border: 2px dashed var(--paper-line); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; }
+  .section-box legend { font-family: "Secular One", sans-serif; padding: 0 6px; font-size: 16px; }
+
+  .meter { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 18px; }
+  .meter-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .meter-val { font-size: 40px; font-weight: 900; line-height: 1; color: var(--lvl, var(--stamp)); }
+  .meter-val small { font-size: 16px; color: var(--ink-soft); font-weight: 500; }
+  .meter-name { font-weight: 700; font-size: 16px; color: var(--lvl, var(--stamp)); }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 12px; border-radius: 6px; outline: none;
+    background: linear-gradient(to left, var(--lvl, var(--stamp)) var(--fill, 50%), #ece5d3 var(--fill, 50%));
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%;
+    background: #fff; border: 4px solid var(--lvl, var(--stamp)); box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; border: 4px solid var(--lvl, var(--stamp)); box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .meter-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+
+  /* ---------- שיתוף ---------- */
+  .share-preview {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+    white-space: pre-wrap; font-size: 14px; line-height: 1.6; max-height: 300px; overflow: auto; margin-bottom: 14px;
+  }
+  .toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--card); padding: 12px 14px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 10px; }
+  .toggle input { width: 22px; height: 22px; accent-color: var(--stamp); }
+  .share-grid { display: grid; gap: 10px; }
+  .btn-wa { background: #25d366; color: #fff; }
+
+  /* ---------- חלון סטטוס ---------- */
+  .sheet-backdrop { position: fixed; inset: 0; background: rgba(15,20,35,.55); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+  .sheet-backdrop.open { display: flex; }
+  .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .btn-danger { background: var(--stamp); color: #fff; }
+  .known { margin-bottom: 14px; }
+  .known .lbl { font-size: 14px; }
+  .known .people { padding-bottom: 4px; }
+  .add-for { width: 100%; margin-bottom: 12px; text-decoration: none; }
+  a.btn { text-decoration: none; }
+  .sheet {
+    width: 100%; max-width: 480px; background: var(--paper); border-radius: 20px 20px 0 0; padding: 18px 16px 26px;
+    animation: up .22s ease;
+  }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sheet h3 { margin: 0 0 4px; color: var(--ink); font-size: 18px; }
+  .sheet .who { margin-bottom: 14px; color: var(--ink-soft); font-size: 14px; }
+  .status-opts { display: grid; gap: 8px; }
+  .status-opt {
+    display: flex; align-items: center; gap: 10px; text-align: start; width: 100%;
+    background: var(--card); border: 2px solid var(--paper-line); border-radius: 12px; padding: 12px 14px; font-size: 16px; font-weight: 500;
+  }
+  .status-opt.current { border-color: var(--ink); }
+  .status-opt .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .status-opt small { margin-inline-start: auto; color: var(--ink-soft); font-size: 12px; }
+
+  /* ---------- הודעה קופצת ---------- */
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+    background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 500; font-size: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3); transition: all .25s ease; z-index: 60; max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .done-stamp {
+    position: absolute; top: 10px; left: 12px; font-family: "Secular One", sans-serif; color: var(--ok);
+    border: 2px solid var(--ok); border-radius: 6px; padding: 0 8px; transform: rotate(-10deg); font-size: 14px; opacity: .85;
+  }
+  .install { margin-top: 18px; background: var(--card); border: 2px solid var(--ink); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; }
+  .install b { font-size: 16px; }
+  .install p { margin: 4px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .install-actions { display: flex; gap: 8px; }
+  .install-actions .btn { padding: 8px 16px; font-size: 14px; }
+  label.btn { cursor: pointer; }
+  footer { text-align: center; font-size: 12px; color: var(--ink-soft); padding: 0 16px 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <div class="logo-mark">נ</div>
+        <div>
+          <h1>פנקס הנקמות</h1>
+          <small>כל חשבון נסגר בסוף</small>
+        </div>
+      </div>
+      <button class="icon-btn" id="soundBtn" aria-label="השתקת הקריינות" title="קריינות"></button>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button data-tab="home" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+        ראשי
+      </button>
+      <button data-tab="list">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+        הנקמות שלי
+        <span class="badge" id="openBadge"></span>
+      </button>
+      <button data-tab="add">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+        הוספה
+      </button>
+      <button data-tab="share">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        שיתוף
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ראשי -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <div class="stamp">חשבונות פתוחים</div>
+        <h2 id="greeting">שלום!</h2>
+        <p class="muted">כאן רושמים, מדרגים וסוגרים חשבונות — בסבלנות ובסטייל.</p>
+        <button class="btn btn-primary" data-go="add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          רישום נקמה חדשה
+        </button>
+      </div>
+      <div class="stats">
+        <div class="stat red"><b id="statOpen">0</b><span>נקמות פתוחות</span></div>
+        <div class="stat green"><b id="statDone">0</b><span>הושלמו</span></div>
+        <div class="stat"><b id="statAvg">–</b><span>רמה ממוצעת</span></div>
+      </div>
+      <h3 id="topTitle" style="display:none">בראש הרשימה</h3>
+      <div id="topPeople" class="person-table" style="display:none"></div>
+      <div class="install" id="installCard" hidden>
+        <div>
+          <b>התקנה במסך הבית</b>
+          <p id="installText">כך הפנקס ייפתח כמו אפליקציה, והנקמות יישמרו בטלפון באופן יציב יותר.</p>
+        </div>
+        <div class="install-actions">
+          <button class="btn btn-ink" id="installBtn" hidden>התקנה</button>
+          <button class="btn btn-ghost" id="installClose">לא עכשיו</button>
+        </div>
+      </div>
+      <div class="quote" id="quote"></div>
+    </section>
+
+    <!-- הנקמות שלי -->
+    <section class="view" id="view-list">
+      <h2>הנקמות שלי</h2>
+      <div class="seg">
+        <button data-filter="open" class="active">פתוחות</button>
+        <button data-filter="done">הושלמו</button>
+      </div>
+      <div id="peopleWrap">
+        <h3 style="margin-top:4px">כמה נקמות יש לכל אחד</h3>
+        <div class="people" id="people"></div>
+      </div>
+      <button class="btn btn-primary add-for" id="addFor" hidden></button>
+      <div id="cards"></div>
+    </section>
+
+    <!-- הוספה -->
+    <section class="view" id="view-add">
+      <h2 id="formTitle">נקמה חדשה</h2>
+      <form id="form" autocomplete="off" novalidate>
+        <input type="hidden" id="editId">
+        <fieldset class="section-box">
+          <legend>על מי מדובר?</legend>
+          <div class="known" id="knownWrap" hidden>
+            <span class="lbl">אדם שכבר רשום בפנקס? <span class="opt">(בחירה ממלאת את הפרטים)</span></span>
+            <div class="people" id="knownPeople"></div>
+          </div>
+          <div class="field">
+            <label class="lbl" for="fName">שם מלא</label>
+            <input class="input" id="fName" required maxlength="60" placeholder="לדוגמה: ישראל ישראלי">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label class="lbl" for="fRelation">קשר <span class="opt">(רשות)</span></label>
+              <select class="input" id="fRelation">
+                <option value="">בחירה…</option>
+                <option>שכן/ה</option>
+                <option>עמית/ה לעבודה</option>
+                <option>בוס/ית</option>
+                <option>בן/בת זוג לשעבר</option>
+                <option>חבר/ה</option>
+                <option>בן/בת משפחה</option>
+                <option>נותן/ת שירות</option>
+                <option>אחר</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="lbl" for="fPlace">היכן נפגשים? <span class="opt">(רשות)</span></label>
+              <input class="input" id="fPlace" maxlength="40" placeholder="לדוגמה: בחדר המדרגות">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label class="lbl" for="fNotes">פרטים נוספים על האדם <span class="opt">(רשות)</span></label>
+            <input class="input" id="fNotes" maxlength="120" placeholder="תכונות, הרגלים, נקודות תורפה…">
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="lbl" for="fReason">מה קרה? פירוט הנקמה</label>
+          <textarea class="input" id="fReason" required maxlength="600" placeholder="מה הוא/היא עשו, ואיך בדיוק נסגור את החשבון…"></textarea>
+        </div>
+
+        <label class="lbl" for="fLevel">רמת הנקמה</label>
+        <div class="meter" id="meter">
+          <div class="meter-top">
+            <div class="meter-val"><span id="levelVal">5</span><small> / 10</small></div>
+            <div class="meter-name" id="levelName">בינונית</div>
+          </div>
+          <input type="range" id="fLevel" min="1" max="10" step="1" value="5" aria-describedby="levelName">
+          <div class="meter-scale"><span>1 · נמוכה</span><span>10 · גבוהה</span></div>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit" id="submitBtn">שמירת הנקמה</button>
+        <button class="btn btn-ghost btn-block" type="button" id="cancelEdit" style="display:none;margin-top:10px">ביטול העריכה</button>
+      </form>
+    </section>
+
+    <!-- שיתוף -->
+    <section class="view" id="view-share">
+      <h2>שיתוף הנקמות</h2>
+      <p class="muted" style="margin-top:-4px">כך תיראה ההודעה שתישלח:</p>
+      <label class="toggle"><span>לכלול את פירוט הנקמה</span><input type="checkbox" id="shareDetails"></label>
+      <label class="toggle"><span>לכלול גם נקמות שהושלמו</span><input type="checkbox" id="shareDone"></label>
+      <div class="share-preview" id="sharePreview"></div>
+      <div class="share-grid">
+        <button class="btn btn-ink btn-block" id="shareNative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12M7 8l5-5 5 5"/></svg>
+          שיתוף
+        </button>
+        <a class="btn btn-wa btn-block" id="shareWa" href="https://wa.me/" target="_blank" rel="noopener">שליחה בוואטסאפ</a>
+        <button class="btn btn-ghost btn-block" id="shareCopy">העתקת הטקסט</button>
+      </div>
+
+      <h2 style="margin-top:28px">גיבוי ושחזור</h2>
+      <p class="muted" style="margin-top:-4px">הנקמות נשמרות בטלפון הזה בלבד. כדאי לשמור מדי פעם קובץ גיבוי, כדי שאפשר יהיה לשחזר אותן אם הדפדפן יימחק או כשעוברים לטלפון חדש.</p>
+      <div class="share-grid">
+        <button class="btn btn-ink btn-block" id="backupBtn">שמירת קובץ גיבוי</button>
+        <label class="btn btn-ghost btn-block" for="restoreFile">שחזור מקובץ גיבוי</label>
+        <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="muted" id="backupInfo" style="font-size:13px"></p>
+    </section>
+  </main>
+  <footer>הנתונים נשמרים במכשיר זה בלבד · לשימוש הומוריסטי בלבד 😉</footer>
+</div>
+
+<!-- חלון עדכון סטטוס -->
+<div class="sheet-backdrop" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet">
+    <h3 id="sheetTitle">עדכון סטטוס הנקמה</h3>
+    <div class="who" id="sheetWho"></div>
+    <div class="status-opts" id="statusOpts"></div>
+    <button class="btn btn-ghost btn-block" style="margin-top:12px" id="sheetClose">סגירה</button>
+  </div>
+</div>
+
+<!-- חלון אישור מחיקה -->
+<div class="sheet-backdrop" id="confirmSheet" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="sheet">
+    <h3 id="confirmTitle">מחיקת הנקמה</h3>
+    <div class="who" id="confirmText"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-danger" id="confirmYes">מחיקה</button>
+      <button class="btn btn-ghost" id="confirmNo">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- הגדרות ----------
+  const STORE_KEY = 'pinkas-nekamot-v1';
+  const SOUND_KEY = 'pinkas-nekamot-sound';
+  const STATUSES = {
+    open:     { label: 'פתוחה',     color: '#b5651d', hint: 'נרשמה, טרם טופלה' },
+    planning: { label: 'בתכנון',    color: '#3f5bb8', hint: 'שוקדים על התוכנית' },
+    active:   { label: 'בביצוע',    color: '#c8283c', hint: 'המבצע יצא לדרך' },
+    done:     { label: 'הושלמה',    color: '#2f8a5b', hint: 'החשבון נסגר בהצלחה' }
+  };
+  const QUOTES = [
+    ['נקמה היא מנה שמוגשת קרה.', 'פתגם עממי'],
+    ['מי שצוחק אחרון — צוחק הכי טוב.', 'פתגם עממי'],
+    ['סבלנות היא חצי מהנקמה.', 'מתוך הפנקס'],
+    ['אל תכעס — תרשום.', 'מתוך הפנקס'],
+    ['החשבון אולי ארוך, אבל הוא תמיד נסגר.', 'מתוך הפנקס']
+  ];
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+  // ---------- אחסון ----------
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch { return []; }
+  }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(items)); } catch {}
+  }
+  let items = load();
+  let soundOn = true;
+  try { soundOn = localStorage.getItem(SOUND_KEY) !== 'off'; } catch {}
+
+  const openItems = () => items.filter(i => i.status !== 'done');
+  const doneItems = () => items.filter(i => i.status === 'done');
+
+  // ---------- עזרים ----------
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function levelName(n) {
+    if (n <= 2) return 'עקיצה קלה';
+    if (n <= 4) return 'נמוכה';
+    if (n <= 6) return 'בינונית';
+    if (n <= 8) return 'גבוהה';
+    return 'קיצונית';
+  }
+  function levelColor(n) {
+    // ממעבר צהוב-זהוב (נמוך) לאדום עמוק (גבוה)
+    const stops = ['#d9a21b', '#e08a1f', '#e26a26', '#d9472f', '#c8283c', '#9c1b2d'];
+    return stops[Math.min(stops.length - 1, Math.floor((n - 1) / 10 * stops.length))];
+  }
+  function fmtDate(ts) {
+    try { return new Date(ts).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' }); }
+    catch { return ''; }
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  // מספרים בלשון נקבה (נקמה — שם עצם בנקבה)
+  function femNumber(n) {
+    const units = ['', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע'];
+    const teens = ['', 'אחת', 'שתים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע'];
+    const tens = ['', 'עשר', 'עשרים', 'שלושים', 'ארבעים', 'חמישים', 'שישים', 'שבעים', 'שמונים', 'תשעים'];
+    if (n < 10) return units[n];
+    if (n === 10) return 'עשר';
+    if (n < 20) return teens[n - 10] + ' עשרה';
+    if (n < 100) return n % 10 === 0 ? tens[n / 10] : tens[Math.floor(n / 10)] + ' ו' + units[n % 10];
+    return String(n);
+  }
+  function openCountPhrase(n) {
+    if (n === 0) return 'אין כרגע נקמות פעילות';
+    if (n === 1) return 'יש כרגע נקמה פעילה אחת';
+    if (n === 2) return 'יש כרגע שתי נקמות פעילות';
+    return 'יש כרגע ' + femNumber(n) + ' נקמות פעילות';
+  }
+
+  // ---------- קריינות ----------
+  let heVoice = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = speechSynthesis.getVoices();
+    heVoice = voices.find(v => /^he|^iw/i.test(v.lang)) || null;
+  }
+  if ('speechSynthesis' in window) {
+    pickVoice();
+    speechSynthesis.onvoiceschanged = pickVoice;
+  }
+  // כרום נוטה "לבלוע" הקראה שמתחילה מיד אחרי cancel(), ולפעמים נתקע במצב מושהה —
+  // לכן מקריאים משפט אחרי משפט, עם השהיה קצרה אחרי ביטול ועם resume().
+  let speechQueue = [];
+  let currentUtterance = null; // שמירת הפניה כדי שהדפדפן לא ישליך את ההקראה באמצע
+  let warnedNoVoice = false;
+  function speakNext() {
+    const text = speechQueue.shift();
+    if (!text) { currentUtterance = null; return; }
+    if (!heVoice) pickVoice();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'he-IL';
+    if (heVoice) u.voice = heVoice;
+    u.rate = 0.95;
+    u.onend = u.onerror = () => { if (currentUtterance === u) speakNext(); };
+    currentUtterance = u;
+    speechSynthesis.resume();
+    speechSynthesis.speak(u);
+  }
+  function speak(...lines) {
+    if (!soundOn) return;
+    if (!('speechSynthesis' in window)) { toast('הדפדפן הזה אינו תומך בהקראה קולית'); return; }
+    if (!heVoice) pickVoice();
+    if (!heVoice && !warnedNoVoice) {
+      warnedNoVoice = true;
+      toast('לא נמצא קול עברי במכשיר — יש להוסיף קול עברי בהגדרות הנגישות');
+    }
+    const busy = speechSynthesis.speaking || speechSynthesis.pending;
+    speechQueue = lines.filter(Boolean);
+    currentUtterance = null;
+    if (busy) {
+      speechSynthesis.cancel();
+      setTimeout(speakNext, 120);
+    } else {
+      speakNext();
+    }
+  }
+
+  const ICON_SOUND_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const ICON_SOUND_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
+  function renderSoundBtn() {
+    const b = $('#soundBtn');
+    b.innerHTML = soundOn ? ICON_SOUND_ON : ICON_SOUND_OFF;
+    b.setAttribute('aria-label', soundOn ? 'השתקת הקריינות' : 'הפעלת הקריינות');
+    b.title = soundOn ? 'הקריינות פועלת' : 'הקריינות מושתקת';
+  }
+  $('#soundBtn').addEventListener('click', () => {
+    soundOn = !soundOn;
+    try { localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off'); } catch {}
+    renderSoundBtn();
+    if (soundOn) speak('הקריינות הופעלה');
+    else if ('speechSynthesis' in window) speechSynthesis.cancel();
+    toast(soundOn ? 'הקריינות הופעלה 🔊' : 'הקריינות הושתקה 🔇');
+  });
+
+  // ---------- הודעות ----------
+  let toastTimer;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ---------- ניווט ----------
+  function go(tab) {
+    $$('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + tab));
+    if (tab === 'share') renderShare();
+    if (tab === 'add') renderKnown();
+    window.scrollTo({ top: 0 });
+  }
+  $$('nav.tabs button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.tab === 'add' && $('#editId').value) resetForm();
+    go(b.dataset.tab);
+  }));
+  document.addEventListener('click', e => {
+    const g = e.target.closest('[data-go]');
+    if (g) go(g.dataset.go);
+  });
+
+  // ---------- ראשי ----------
+  function renderHome() {
+    const h = new Date().getHours();
+    const greet = h < 5 ? 'לילה טוב' : h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : h < 21 ? 'ערב טוב' : 'לילה טוב';
+    $('#greeting').textContent = greet + ', נוקם/ת יקר/ה!';
+    const open = openItems();
+    $('#statOpen').textContent = open.length;
+    $('#statDone').textContent = doneItems().length;
+    $('#statAvg').textContent = open.length
+      ? (open.reduce((s, i) => s + i.level, 0) / open.length).toFixed(1)
+      : '–';
+    $('#openBadge').textContent = open.length || '';
+
+    const groups = groupByPerson(open).slice(0, 3);
+    const show = groups.length > 0;
+    $('#topTitle').style.display = show ? '' : 'none';
+    $('#topPeople').style.display = show ? '' : 'none';
+    const max = groups[0]?.count || 1;
+    $('#topPeople').innerHTML = groups.map(g => `
+      <div class="person-row">
+        <span>${esc(g.name)}</span>
+        <span class="bar"><i style="width:${(g.count / max) * 100}%"></i></span>
+        <span class="num">${g.count === 1 ? 'נקמה אחת' : g.count + ' נקמות'}</span>
+      </div>`).join('');
+  }
+  function renderQuote() {
+    const [q, src] = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    $('#quote').innerHTML = `"${esc(q)}"<small>— ${esc(src)}</small>`;
+  }
+
+  // ---------- הנקמות שלי ----------
+  let listFilter = 'open';
+  let personFilter = null;
+
+  function groupByPerson(list) {
+    const map = new Map();
+    list.forEach(i => {
+      const key = i.name.trim();
+      const g = map.get(key) || { name: key, count: 0, maxLevel: 0 };
+      g.count++;
+      g.maxLevel = Math.max(g.maxLevel, i.level);
+      map.set(key, g);
+    });
+    return [...map.values()].sort((a, b) => b.count - a.count || b.maxLevel - a.maxLevel);
+  }
+
+  $$('.seg button').forEach(b => b.addEventListener('click', () => {
+    listFilter = b.dataset.filter;
+    personFilter = null;
+    $$('.seg button').forEach(x => x.classList.toggle('active', x === b));
+    renderList();
+  }));
+
+  function renderList() {
+    const base = listFilter === 'open' ? openItems() : doneItems();
+    const groups = groupByPerson(base);
+    if (personFilter && !groups.some(g => g.name === personFilter)) personFilter = null;
+
+    $('#peopleWrap').style.display = groups.length ? '' : 'none';
+    $('#peopleWrap h3').textContent = listFilter === 'open' ? 'כמה נקמות פתוחות יש לכל אחד' : 'כמה נקמות הושלמו לכל אחד';
+    $('#people').innerHTML =
+      `<button class="chip ${personFilter ? '' : 'active'}" data-person="">הכול <span class="count">${base.length}</span></button>` +
+      groups.map(g => `<button class="chip ${personFilter === g.name ? 'active' : ''}" data-person="${esc(g.name)}">${esc(g.name)} <span class="count">${g.count}</span></button>`).join('');
+
+    const addFor = $('#addFor');
+    addFor.hidden = !(personFilter && listFilter === 'open');
+    if (personFilter) addFor.textContent = '+ נקמה נוספת ל' + personFilter;
+
+    const list = (personFilter ? base.filter(i => i.name.trim() === personFilter) : base)
+      .sort((a, b) => listFilter === 'open' ? (b.level - a.level || b.createdAt - a.createdAt) : (b.doneAt || 0) - (a.doneAt || 0));
+
+    if (!list.length) {
+      $('#cards').innerHTML = listFilter === 'open'
+        ? `<div class="empty"><div class="big">🕊️</div><p>אין נקמות פתוחות. שקט ושלווה… בינתיים.</p><button class="btn btn-primary" data-go="add">רישום נקמה חדשה</button></div>`
+        : `<div class="empty"><div class="big">📭</div><p>עדיין לא הושלמה אף נקמה. הזמן יגיע.</p></div>`;
+      return;
+    }
+
+    $('#cards').innerHTML = list.map(i => {
+      const st = STATUSES[i.status] || STATUSES.open;
+      const meta = [i.relation, i.place].filter(Boolean).map(esc).join(' · ');
+      const isDone = i.status === 'done';
+      return `
+      <article class="card" style="--lvl:${levelColor(i.level)}" data-id="${i.id}">
+        ${isDone ? '<span class="done-stamp">נסגר!</span>' : ''}
+        <div class="card-head">
+          <div>
+            <div class="card-title">${esc(i.name)}</div>
+            ${meta ? `<div class="card-sub">${meta}</div>` : ''}
+            ${i.notes ? `<div class="card-sub">📝 ${esc(i.notes)}</div>` : ''}
+          </div>
+          <div class="level-pill">${i.level}<small>${levelName(i.level)}</small></div>
+        </div>
+        <p>${esc(i.reason)}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <span class="status ${i.status}">${st.label}</span>
+          <span class="date">${isDone ? 'הושלמה ב־' + fmtDate(i.doneAt) : 'נרשמה ב־' + fmtDate(i.createdAt)}</span>
+        </div>
+        <div class="card-actions">
+          ${isDone
+            ? `<button class="btn btn-ghost" data-act="reopen">פתיחה מחדש</button>`
+            : `<button class="btn btn-ink" data-act="status">עדכון סטטוס</button>
+               <button class="btn btn-ok" data-act="complete">✓ הושלמה</button>`}
+          <span class="spacer"></span>
+          <button class="mini" data-act="share" aria-label="שיתוף הנקמה" title="שיתוף">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
+          ${isDone ? '' : `<button class="mini" data-act="edit" aria-label="עריכה" title="עריכה">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          </button>`}
+          <button class="mini danger" data-act="delete" aria-label="מחיקה" title="מחיקה">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+          </button>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  $('#people').addEventListener('click', e => {
+    const c = e.target.closest('.chip');
+    if (!c) return;
+    personFilter = c.dataset.person || null;
+    renderList();
+  });
+
+  $('#cards').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.closest('.card').dataset.id;
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    switch (btn.dataset.act) {
+      case 'status': openSheet(item); break;
+      case 'complete': setStatus(item, 'done'); break;
+      case 'reopen': setStatus(item, 'open'); break;
+      case 'delete': removeItem(item); break;
+      case 'edit': startEdit(item); break;
+      case 'share': shareText(singleShareText(item)); break;
+    }
+  });
+
+  // ---------- פעולות ----------
+  function setStatus(item, status) {
+    if (item.status === status) return;
+    const wasOpen = item.status !== 'done';
+    item.status = status;
+    if (status === 'done') {
+      item.doneAt = Date.now();
+      save(); renderAll();
+      if (wasOpen) {
+        // הנקמה יוצאת מרשימת הפתוחות עקב הצלחה
+        speak('נקמה הושלמה בהצלחה', openCountPhrase(openItems().length));
+        toast('🎉 נקמה הושלמה בהצלחה! ' + openCountPhrase(openItems().length) + '.');
+      }
+    } else {
+      delete item.doneAt;
+      save(); renderAll();
+      if (wasOpen) toast('הסטטוס עודכן: ' + STATUSES[status].label);
+      else {
+        const count = openCountPhrase(openItems().length);
+        speak('הנקמה נפתחה מחדש', count);
+        toast('↩️ הנקמה נפתחה מחדש. ' + count + '.');
+      }
+    }
+  }
+
+  let pendingDelete = null;
+  function removeItem(item) {
+    pendingDelete = item;
+    $('#confirmText').textContent = `למחוק את הנקמה ב${item.name}? לא ניתן לבטל פעולה זו.`;
+    $('#confirmSheet').classList.add('open');
+  }
+  function closeConfirm() { $('#confirmSheet').classList.remove('open'); pendingDelete = null; }
+  $('#confirmNo').addEventListener('click', closeConfirm);
+  $('#confirmSheet').addEventListener('click', e => { if (e.target.id === 'confirmSheet') closeConfirm(); });
+  $('#confirmYes').addEventListener('click', () => {
+    const item = pendingDelete;
+    closeConfirm();
+    if (item) deleteItem(item);
+  });
+  function deleteItem(item) {
+    items = items.filter(i => i !== item);
+    save(); renderAll();
+    const left = openCountPhrase(openItems().length);
+    speak('הנקמה נמחקה', left);
+    toast('🗑️ הנקמה נמחקה. ' + left + '.');
+  }
+
+  // ---------- חלון סטטוס ----------
+  let sheetItem = null;
+  function openSheet(item) {
+    sheetItem = item;
+    $('#sheetWho').textContent = `${item.name} · רמה ${item.level}`;
+    $('#statusOpts').innerHTML = Object.entries(STATUSES).map(([k, s]) => `
+      <button class="status-opt ${item.status === k ? 'current' : ''}" data-status="${k}">
+        <span class="dot" style="background:${s.color}"></span>${s.label}<small>${s.hint}</small>
+      </button>`).join('');
+    $('#sheet').classList.add('open');
+  }
+  function closeSheet() { $('#sheet').classList.remove('open'); sheetItem = null; }
+  $('#sheetClose').addEventListener('click', closeSheet);
+  $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSheet(); closeConfirm(); } });
+  $('#statusOpts').addEventListener('click', e => {
+    const b = e.target.closest('[data-status]');
+    if (!b || !sheetItem) return;
+    const item = sheetItem;
+    closeSheet();
+    setStatus(item, b.dataset.status);
+  });
+
+  // ---------- טופס ----------
+  const range = $('#fLevel');
+  function updateMeter() {
+    const n = +range.value;
+    const color = levelColor(n);
+    $('#levelVal').textContent = n;
+    $('#levelName').textContent = levelName(n);
+    $('#meter').style.setProperty('--lvl', color);
+    range.style.setProperty('--fill', ((n - 1) / 9 * 100) + '%');
+  }
+  range.addEventListener('input', updateMeter);
+
+  function resetForm() {
+    $('#form').reset();
+    $('#editId').value = '';
+    $('#formTitle').textContent = 'נקמה חדשה';
+    $('#submitBtn').textContent = 'שמירת הנקמה';
+    $('#cancelEdit').style.display = 'none';
+    $$('.input').forEach(i => i.style.borderColor = '');
+    updateMeter();
+  }
+  // אנשים שכבר רשומים בפנקס — לבחירה מהירה בטופס ההוספה
+  function knownPeople() {
+    const map = new Map();
+    [...items].sort((a, b) => a.createdAt - b.createdAt).forEach(i => map.set(i.name.trim(), i));
+    return [...map.values()];
+  }
+  function renderKnown() {
+    const editing = !!$('#editId').value;
+    const people = knownPeople();
+    $('#knownWrap').hidden = editing || !people.length;
+    const current = $('#fName').value.trim();
+    $('#knownPeople').innerHTML = people.map(p => {
+      const n = openItems().filter(i => i.name.trim() === p.name.trim()).length;
+      return `<button type="button" class="chip ${current === p.name.trim() ? 'active' : ''}" data-known="${esc(p.name.trim())}">${esc(p.name)} <span class="count">${n}</span></button>`;
+    }).join('');
+  }
+  function fillPerson(name) {
+    const p = knownPeople().find(x => x.name.trim() === name);
+    if (!p) return;
+    $('#fName').value = p.name;
+    $('#fRelation').value = p.relation || '';
+    $('#fPlace').value = p.place || '';
+    $('#fNotes').value = p.notes || '';
+    $('#fName').style.borderColor = '';
+    renderKnown();
+  }
+  $('#knownPeople').addEventListener('click', e => {
+    const c = e.target.closest('[data-known]');
+    if (!c) return;
+    fillPerson(c.dataset.known);
+    $('#fReason').focus();
+  });
+  $('#fName').addEventListener('input', renderKnown);
+  function startAddFor(name) {
+    resetForm();
+    fillPerson(name);
+    go('add');
+    setTimeout(() => $('#fReason').focus(), 50);
+  }
+  $('#addFor').addEventListener('click', () => { if (personFilter) startAddFor(personFilter); });
+
+  function startEdit(item) {
+    $('#editId').value = item.id;
+    $('#fName').value = item.name;
+    $('#fRelation').value = item.relation || '';
+    $('#fPlace').value = item.place || '';
+    $('#fNotes').value = item.notes || '';
+    $('#fReason').value = item.reason;
+    range.value = item.level;
+    updateMeter();
+    $('#formTitle').textContent = 'עריכת נקמה';
+    $('#submitBtn').textContent = 'שמירת השינויים';
+    $('#cancelEdit').style.display = '';
+    go('add');
+  }
+  $('#cancelEdit').addEventListener('click', () => { resetForm(); go('list'); });
+
+  $('#form').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('#fName').value.trim();
+    const reason = $('#fReason').value.trim();
+    let bad = false;
+    [['#fName', name], ['#fReason', reason]].forEach(([sel, v]) => {
+      $(sel).style.borderColor = v ? '' : 'var(--stamp)';
+      if (!v) bad = true;
+    });
+    if (bad) { toast('יש למלא שם ופירוט הנקמה'); return; }
+
+    const data = {
+      name, reason,
+      relation: $('#fRelation').value,
+      place: $('#fPlace').value.trim(),
+      notes: $('#fNotes').value.trim(),
+      level: +range.value
+    };
+    const editId = $('#editId').value;
+    if (editId) {
+      const item = items.find(i => i.id === editId);
+      if (item) Object.assign(item, data);
+      save(); resetForm(); renderAll();
+      toast('✏️ הנקמה עודכנה');
+    } else {
+      items.push({ id: uid(), ...data, status: 'open', createdAt: Date.now() });
+      save(); resetForm(); renderAll();
+      const count = openCountPhrase(openItems().length);
+      speak('נקמה חדשה נוצרה', count);
+      toast('📒 נקמה חדשה נוצרה! ' + count + '.');
+    }
+    listFilter = 'open';
+    $$('.seg button').forEach(x => x.classList.toggle('active', x.dataset.filter === 'open'));
+    renderList();
+    go('list');
+  });
+
+  // ---------- שיתוף ----------
+  function shareListText() {
+    const withDetails = $('#shareDetails').checked;
+    const withDone = $('#shareDone').checked;
+    const open = openItems().sort((a, b) => b.level - a.level);
+    const lines = ['📒 פנקס הנקמות שלי', ''];
+    if (!open.length) lines.push('אין לי כרגע נקמות פתוחות. 🕊️');
+    else {
+      lines.push(`נקמות פתוחות: ${open.length}`);
+      open.forEach(i => {
+        lines.push(`• ${i.name} — רמה ${i.level}/10 (${STATUSES[i.status].label})`);
+        if (withDetails) lines.push(`   ${i.reason.replace(/\n+/g, ' ')}`);
+      });
+    }
+    const done = doneItems();
+    if (withDone && done.length) {
+      lines.push('', `✅ נקמות שהושלמו: ${done.length}`);
+      done.forEach(i => {
+        lines.push(`• ${i.name} — רמה ${i.level}/10`);
+        if (withDetails) lines.push(`   ${i.reason.replace(/\n+/g, ' ')}`);
+      });
+    }
+    lines.push('', 'נרשם בפנקס הנקמות — כל חשבון נסגר בסוף.');
+    return lines.join('\n');
+  }
+  function singleShareText(i) {
+    return [
+      '📒 מתוך פנקס הנקמות שלי:',
+      `${i.name} — רמת נקמה ${i.level}/10 (${levelName(i.level)})`,
+      `סטטוס: ${STATUSES[i.status].label}`,
+      i.reason
+    ].join('\n');
+  }
+  function renderShare() {
+    const text = shareListText();
+    $('#sharePreview').textContent = text;
+    $('#shareWa').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+  }
+  $('#shareDetails').addEventListener('change', renderShare);
+  $('#shareDone').addEventListener('change', renderShare);
+
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); toast('📋 הטקסט הועתק'); }
+    catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); toast('📋 הטקסט הועתק'); } catch { toast('לא ניתן היה להעתיק'); }
+      ta.remove();
+    }
+  }
+  async function shareText(text) {
+    if (navigator.share) {
+      try { await navigator.share({ title: 'פנקס הנקמות', text }); return; }
+      catch (err) { if (err && err.name === 'AbortError') return; }
+    }
+    copy(text);
+  }
+  $('#shareNative').addEventListener('click', () => shareText(shareListText()));
+  $('#shareCopy').addEventListener('click', () => copy(shareListText()));
+
+  // ---------- גיבוי ושחזור ----------
+  const BACKUP_KEY = 'pinkas-nekamot-last-backup';
+  function renderBackupInfo() {
+    let last = null;
+    try { last = +localStorage.getItem(BACKUP_KEY) || null; } catch {}
+    $('#backupInfo').textContent = last ? 'הגיבוי האחרון נשמר ב־' + fmtDate(last) + '.' : 'עדיין לא נשמר גיבוי במכשיר הזה.';
+  }
+  $('#backupBtn').addEventListener('click', async () => {
+    if (!items.length) { toast('אין עדיין נקמות לגבות'); return; }
+    const d = new Date();
+    const stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const name = 'pinkas-nekamot-' + stamp + '.json';
+    const json = JSON.stringify({ app: 'pinkas-nekamot', version: 1, exportedAt: Date.now(), items }, null, 2);
+    const file = new File([json], name, { type: 'application/json' });
+    let saved = false;
+    // בטלפון: תפריט השיתוף מאפשר לשמור בקבצים, בדרייב או לשלוח לעצמך
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'גיבוי פנקס הנקמות' }); saved = true; }
+      catch (err) { if (err && err.name === 'AbortError') return; }
+    }
+    if (!saved) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+    try { localStorage.setItem(BACKUP_KEY, String(Date.now())); } catch {}
+    renderBackupInfo();
+    toast('💾 קובץ הגיבוי נשמר');
+  });
+  $('#restoreFile').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const list = Array.isArray(data) ? data : data.items;
+      if (!Array.isArray(list)) throw new Error('bad');
+      const valid = list.filter(i => i && typeof i.name === 'string' && typeof i.reason === 'string');
+      const known = new Set(items.map(i => i.id));
+      let added = 0;
+      valid.forEach(i => {
+        if (known.has(i.id)) return;
+        items.push({
+          id: i.id || uid(), name: i.name, reason: i.reason,
+          relation: i.relation || '', place: i.place || '', notes: i.notes || '',
+          level: Math.min(10, Math.max(1, +i.level || 5)),
+          status: STATUSES[i.status] ? i.status : 'open',
+          createdAt: +i.createdAt || Date.now(),
+          ...(i.status === 'done' ? { doneAt: +i.doneAt || Date.now() } : {})
+        });
+        added++;
+      });
+      save(); renderAll();
+      toast(!added ? 'כל הנקמות שבקובץ כבר קיימות בפנקס' : added === 1 ? '✅ שוחזרה נקמה אחת' : `✅ שוחזרו ${added} נקמות`);
+    } catch {
+      toast('הקובץ אינו קובץ גיבוי תקין של פנקס הנקמות');
+    }
+  });
+
+  // ---------- התקנה ושמירה יציבה ----------
+  const INSTALL_KEY = 'pinkas-nekamot-install-dismissed';
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let dismissed = false;
+  try { dismissed = localStorage.getItem(INSTALL_KEY) === '1'; } catch {}
+  let installEvent = null;
+  if (!standalone && !dismissed && isIOS) {
+    $('#installText').textContent = 'בספארי: לוחצים על כפתור השיתוף ⬆️ ובוחרים "הוספה למסך הבית". כך הפנקס ייפתח כמו אפליקציה, והנקמות יישמרו בטלפון באופן יציב יותר.';
+    $('#installCard').hidden = false;
+  }
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installEvent = e;
+    if (standalone || dismissed) return;
+    $('#installBtn').hidden = false;
+    $('#installCard').hidden = false;
+  });
+  $('#installBtn').addEventListener('click', async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    await installEvent.userChoice.catch(() => {});
+    installEvent = null;
+    $('#installCard').hidden = true;
+  });
+  $('#installClose').addEventListener('click', () => {
+    $('#installCard').hidden = true;
+    try { localStorage.setItem(INSTALL_KEY, '1'); } catch {}
+  });
+  // בקשה מהדפדפן לא למחוק את הנתונים כשחסר מקום
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  // ---------- אתחול ----------
+  function renderAll() { renderHome(); renderList(); if ($('#view-share').classList.contains('active')) renderShare(); }
+  renderSoundBtn();
+  updateMeter();
+  renderQuote();
+  renderBackupInfo();
+  renderAll();
+})();
+</script>
+</body>
+</html>
