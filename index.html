@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>פנקס הנקמות</title>
+<title>Revengue4U</title>
 <meta name="theme-color" content="#1f2a44">
-<meta name="description" content="פנקס הנקמות: רישום נקמות, מעקב לפי אדם, רמת נקמה והקראה קולית בעברית">
+<meta name="description" content="Revengue4U – פנקס הנקמות: רישום נקמות, מעקב לפי אדם, רמת נקמה והקראה קולית בעברית">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="פנקס הנקמות">
+<meta name="apple-mobile-web-app-title" content="Revengue4U">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -307,8 +307,8 @@
       <div class="logo">
         <div class="logo-mark">נ</div>
         <div>
-          <h1>פנקס הנקמות</h1>
-          <small>כל חשבון נסגר בסוף</small>
+          <h1>Revengue4U</h1>
+          <small>פנקס הנקמות · כל חשבון נסגר בסוף</small>
         </div>
       </div>
       <button class="icon-btn" id="soundBtn" aria-label="השתקת הקריינות" title="קריינות"></button>
@@ -996,7 +996,7 @@
     const withDetails = $('#shareDetails').checked;
     const withDone = $('#shareDone').checked;
     const open = openItems().sort((a, b) => b.level - a.level);
-    const lines = ['📒 פנקס הנקמות שלי', ''];
+    const lines = ['📒 פנקס הנקמות שלי ב־Revengue4U', ''];
     if (!open.length) lines.push('אין לי כרגע נקמות פתוחות. 🕊️');
     else {
       lines.push(`נקמות פתוחות: ${open.length}`);
@@ -1013,12 +1013,12 @@
         if (withDetails) lines.push(`   ${i.reason.replace(/\n+/g, ' ')}`);
       });
     }
-    lines.push('', 'נרשם בפנקס הנקמות — כל חשבון נסגר בסוף.');
+    lines.push('', 'נרשם ב־Revengue4U — כל חשבון נסגר בסוף.', location.href.startsWith('http') ? location.origin + location.pathname : '');
     return lines.join('\n');
   }
   function singleShareText(i) {
     return [
-      '📒 מתוך פנקס הנקמות שלי:',
+      '📒 מתוך פנקס הנקמות שלי ב־Revengue4U:',
       `${i.name} — רמת נקמה ${i.level}/10 (${levelName(i.level)})`,
       `סטטוס: ${STATUSES[i.status].label}`,
       i.reason
@@ -1043,7 +1043,7 @@
   }
   async function shareText(text) {
     if (navigator.share) {
-      try { await navigator.share({ title: 'פנקס הנקמות', text }); return; }
+      try { await navigator.share({ title: 'Revengue4U', text }); return; }
       catch (err) { if (err && err.name === 'AbortError') return; }
     }
     copy(text);
@@ -1068,7 +1068,7 @@
     let saved = false;
     // בטלפון: תפריט השיתוף מאפשר לשמור בקבצים, בדרייב או לשלוח לעצמך
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'גיבוי פנקס הנקמות' }); saved = true; }
+      try { await navigator.share({ files: [file], title: 'גיבוי Revengue4U' }); saved = true; }
       catch (err) { if (err && err.name === 'AbortError') return; }
     }
     if (!saved) {
